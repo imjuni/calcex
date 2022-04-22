@@ -27,6 +27,38 @@ const onReadableSumShoppingItems = atom<number>((get) => {
   return sum;
 });
 
+const onReadableSplitSumShoppingItems = atom<{ upper3: string; less3: string }>((get) => {
+  const state = get(mainAtom);
+  const sum = state.items.reduce<number>((sum, current) => {
+    return sum + current.price;
+  }, 0);
+
+  const strSum = `${sum}`;
+
+  if (strSum.length <= 3) {
+    return { upper3: '', less3: strSum };
+  }
+
+  const upper = strSum.substring(0, strSum.length - 3);
+  const less = strSum.substring(strSum.length - 3, strSum.length);
+
+  return {
+    upper3: Number.parseInt(upper).toLocaleString('en-US'),
+    less3: less,
+  };
+});
+
+const onReadableRatioShoppingItems = atom<number>((get) => {
+  const state = get(mainAtom);
+  const sum = state.items.reduce<number>((sum, current) => {
+    return sum + current.price;
+  }, 0);
+
+  const strSum = `${sum}`;
+  const last3Number = strSum.substring(strSum.length - 3, strSum.length);
+  return Number.parseInt(last3Number);
+});
+
 const onWritableAppendShoppingItem = atom<null, IShoppingItem>(null, (get, set, update) => {
   const state = get(mainAtom);
   state.items = [...state.items, update];
@@ -34,12 +66,27 @@ const onWritableAppendShoppingItem = atom<null, IShoppingItem>(null, (get, set, 
   return set(mainAtom, { ...state });
 });
 
-const onWritableREmoveShoppingItem = atom<null, string>(null, (get, set, uid) => {
+const onWritableRemoveShoppingItem = atom<null, string>(null, (get, set, uid) => {
   const state = get(mainAtom);
   state.items = state.items.filter((item) => item.uid !== uid);
 
   return set(mainAtom, { ...state });
 });
 
-export const writable = { onWritableAppendShoppingItem, onWritableREmoveShoppingItem };
-export const readable = { onReadableShoppingItems, onReadableSumShoppingItems };
+const onWritableRemoveAllShoppingItem = atom<null, undefined>(null, (get, set) => {
+  const state = get(mainAtom);
+
+  return set(mainAtom, { ...state, items: [] });
+});
+
+export const writable = {
+  onWritableAppendShoppingItem,
+  onWritableRemoveAllShoppingItem,
+  onWritableRemoveShoppingItem,
+};
+export const readable = {
+  onReadableShoppingItems,
+  onReadableSumShoppingItems,
+  onReadableSplitSumShoppingItems,
+  onReadableRatioShoppingItems,
+};

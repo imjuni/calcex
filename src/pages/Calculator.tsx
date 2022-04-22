@@ -5,9 +5,17 @@ import { isFalse } from 'my-easy-fp';
 import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
 import * as uuid from 'uuid';
+import * as mathjs from 'mathjs';
+import classnames from 'classnames';
 import { readable, wirtable } from '../atom/calculator';
 import { readable as shoppingReadable, writable as shoppingWritable } from '../atom/shopping';
-import { uiPrimaryFont, uiPrimaryUX } from '../design/color';
+import {
+  uiPrimaryFont,
+  uiPrimaryGreen,
+  uiPrimaryOrange,
+  uiPrimaryRed,
+  uiPrimaryUX,
+} from '../design/color';
 import { StyledDivPageBody, StyledDivPageBox, StyledDivPageHeading } from './Layout';
 
 const StyledStackHeading = styled(Stack)`
@@ -22,7 +30,7 @@ const StyledStackHeading = styled(Stack)`
   }
 `;
 
-const StyledStackFormular = styled.h1`
+const StyledH1Formular = styled.h1`
   color: ${uiPrimaryFont.lighten(0.1).toString()};
   font-size: 13pt;
   line-height: 15pt;
@@ -47,6 +55,18 @@ const StyledRegisteredShoppingEachItem = styled(Stack)`
 const StyledStackFormularBox = styled(Stack)`
   padding-left: 10px;
   padding-right: 10px;
+
+  .warn-red {
+    color: ${uiPrimaryRed.alpha(0.8).toString()};
+  }
+
+  .warn-orange {
+    color: ${uiPrimaryOrange.alpha(0.8).toString()};
+  }
+
+  .good-green {
+    color: ${uiPrimaryGreen.alpha(0.8).toString()};
+  }
 `;
 
 const StyledStackButtonBox = styled(Stack)`
@@ -57,8 +77,14 @@ const StyledStackButtonBox = styled(Stack)`
 `;
 
 const StyledStackControlButtonBox = styled(Stack)`
-  .ms-Button {
-    width: 50vw;
+  .btn-register {
+    width: 40vw;
+    height: 50px;
+  }
+
+  .btn-clear,
+  .btn-register-clear {
+    width: 30vw;
     height: 50px;
   }
 `;
@@ -79,13 +105,63 @@ const Calculator: React.FC = () => {
   const onRemoveFormular = useUpdateAtom(wirtable.onWritableRemoveFormular);
   const onClearFormular = useUpdateAtom(wirtable.onWritableClearFormular);
   const onAppendShoppingItem = useUpdateAtom(shoppingWritable.onWritableAppendShoppingItem);
+  const onRemoveShoppingItem = useUpdateAtom(shoppingWritable.onWritableRemoveShoppingItem);
+  const onRemoveAllShoppingItem = useUpdateAtom(shoppingWritable.onWritableRemoveAllShoppingItem);
   const shoppingItems = useAtomValue(shoppingReadable.onReadableShoppingItems);
   const sumShoppingItems = useAtomValue(shoppingReadable.onReadableSumShoppingItems);
+  const splitSumShoppingItems = useAtomValue(shoppingReadable.onReadableSplitSumShoppingItems);
+  const ratioShoppingItems = useAtomValue(shoppingReadable.onReadableRatioShoppingItems);
+  const minimumPrice = 5000;
+  const goalLastPrice = 990;
 
   const onHandleClickCalcularButton = useCallback(
     (num: string) => onAppendFormular(num),
     [onAppendFormular],
   );
+
+  const onHandleCalculateRatio = useCallback((price: number) => {
+    if (price < minimumPrice) {
+      return 0;
+    }
+
+    const currentPrice = mathjs.bignumber(price);
+    const goalPrice = mathjs.bignumber(goalLastPrice);
+
+    const ratio = currentPrice.div(goalPrice).mul(mathjs.bignumber(100));
+    const flooredRatio = ratio.mul(mathjs.bignumber(100)).floor().div(mathjs.bignumber(100));
+
+    return flooredRatio.toNumber();
+  }, []);
+
+  const onHandleCalculatePrice = useCallback((total: number, price: number) => {
+    if (total < minimumPrice) {
+      return mathjs
+        .bignumber(minimumPrice + goalLastPrice)
+        .sub(mathjs.bignumber(total))
+        .toNumber();
+    }
+
+    const currentPrice = mathjs.bignumber(price);
+    const goalPrice = mathjs.bignumber(goalLastPrice);
+
+    return goalPrice.sub(currentPrice).toNumber();
+  }, []);
+
+  const onHandleReachPrice = useCallback((total: number, price: number) => {
+    if (total < minimumPrice) {
+      return 'red';
+    }
+
+    if (price < 300) {
+      return 'red';
+    }
+
+    if (price < 600) {
+      return 'orange';
+    }
+
+    return 'green';
+  }, []);
 
   return (
     <StyledDivPageBox>
@@ -104,33 +180,77 @@ const Calculator: React.FC = () => {
               return (
                 <StyledRegisteredShoppingEachItem horizontal>
                   <StyledShoppingItemBox>
-                    <span>{item.price}</span>
+                    <span>{item.price.toLocaleString('en-US')}</span>
                   </StyledShoppingItemBox>
-                  <DefaultButton>x</DefaultButton>
+                  <DefaultButton onClick={() => onRemoveShoppingItem(item.uid)}>x</DefaultButton>
                 </StyledRegisteredShoppingEachItem>
               );
             })}
           </StyledRegisteredShoppingItems>
 
-          <StyledStackFormularBox style={{ textAlign: 'right' }}>
-            <StyledStackFormular>{sumShoppingItems}</StyledStackFormular>
+          <StyledStackFormularBox horizontal>
+            <Stack horizontal style={{ width: '60vw' }}>
+              <StyledH1Formular
+                style={{ width: '50%' }}
+                className={classnames({
+                  'warn-red': onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'red',
+                  'warn-orange':
+                    onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'orange',
+                  'good-green':
+                    onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'green',
+                })}
+              >
+                {onHandleCalculateRatio(ratioShoppingItems)}
+                {'%'}
+              </StyledH1Formular>
+              <StyledH1Formular
+                style={{ width: '50%' }}
+                className={classnames({
+                  'warn-red': onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'red',
+                  'warn-orange':
+                    onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'orange',
+                  'good-green':
+                    onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'green',
+                })}
+              >
+                {onHandleCalculatePrice(sumShoppingItems, ratioShoppingItems)}원 부족
+              </StyledH1Formular>
+            </Stack>
+            <Stack style={{ width: '40vw', textAlign: 'right' }}>
+              {splitSumShoppingItems.upper3 !== '' ? (
+                <Stack horizontal style={{ justifyContent: 'flex-end' }}>
+                  <StyledH1Formular>
+                    {splitSumShoppingItems.upper3}
+                    {','}
+                  </StyledH1Formular>
+                  <StyledH1Formular style={{ fontWeight: 'bold' }}>
+                    {splitSumShoppingItems.less3}
+                  </StyledH1Formular>
+                </Stack>
+              ) : (
+                <StyledH1Formular style={{ fontWeight: 'bold' }}>
+                  {splitSumShoppingItems.less3}
+                </StyledH1Formular>
+              )}
+            </Stack>
           </StyledStackFormularBox>
         </StyledRegisteredShoppingItemBox>
 
         <Stack>
           <StyledStackFormularBox>
-            <StyledStackFormular>{formular}</StyledStackFormular>
+            <StyledH1Formular>{formular}</StyledH1Formular>
           </StyledStackFormularBox>
 
           <StyledStackFormularBox>
-            <StyledStackFormular style={{ textAlign: 'right' }}>
+            <StyledH1Formular style={{ textAlign: 'right' }}>
               {evaluation !== '' ? `= ${evaluation}` : evaluation}
-            </StyledStackFormular>
+            </StyledH1Formular>
           </StyledStackFormularBox>
         </Stack>
 
         <StyledStackControlButtonBox horizontal>
           <PrimaryButton
+            className="btn-register"
             onClick={() => {
               try {
                 const parsedPrice = Number.parseInt(evaluation);
@@ -147,28 +267,33 @@ const Calculator: React.FC = () => {
           >
             등록
           </PrimaryButton>
-          <DefaultButton onClick={() => onClearFormular()}>C</DefaultButton>
+          <DefaultButton className="btn-register-clear" onClick={() => onRemoveAllShoppingItem()}>
+            등록 모두 삭제
+          </DefaultButton>
+          <DefaultButton className="btn-clear" onClick={() => onClearFormular()}>
+            C
+          </DefaultButton>
         </StyledStackControlButtonBox>
 
         <Stack>
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('9')}>9</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('8')}>8</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('7')}>7</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('8')}>8</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('9')}>9</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('/')}>÷</DefaultButton>
           </StyledStackButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('6')}>6</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('5')}>5</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('4')}>4</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('5')}>5</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('6')}>6</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('*')}>×</DefaultButton>
           </StyledStackButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('3')}>3</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('2')}>2</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('1')}>1</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('2')}>2</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('3')}>3</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('-')}>-</DefaultButton>
           </StyledStackButtonBox>
 
