@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { DefaultButton, PrimaryButton, Stack, Text } from '@fluentui/react';
+import classnames from 'classnames';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
-import { isFalse } from 'my-easy-fp';
+import * as mathjs from 'mathjs';
+import { isFalse, isNotEmpty } from 'my-easy-fp';
 import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
 import * as uuid from 'uuid';
-import * as mathjs from 'mathjs';
-import classnames from 'classnames';
 import { readable, wirtable } from '../atom/calculator';
 import { readable as shoppingReadable, writable as shoppingWritable } from '../atom/shopping';
 import {
@@ -17,6 +17,10 @@ import {
   uiPrimaryUX,
 } from '../design/color';
 import { StyledDivPageBody, StyledDivPageBox, StyledDivPageHeading } from './Layout';
+import { nanoid } from 'nanoid';
+
+const buttonHeight = 40;
+const textHeight = 15;
 
 const StyledStackHeading = styled(Stack)`
   width: 100%;
@@ -33,18 +37,20 @@ const StyledStackHeading = styled(Stack)`
 const StyledH1Formular = styled.h1`
   color: ${uiPrimaryFont.lighten(0.1).toString()};
   font-size: 13pt;
-  line-height: 15pt;
-  height: 15pt;
+  line-height: ${textHeight}pt;
+  height: ${textHeight}pt;
 `;
 
+// 제목이 60px라서 60을 더해줘야 제대로 계산이 된다
 const StyledRegisteredShoppingItemBox = styled(Stack)`
-  height: calc(100vh - 310px - 30pt);
+  height: calc(100vh - ${buttonHeight * 6 + 60}px - ${textHeight * 3}pt);
   padding-left: 10px;
   padding-right: 10px;
 `;
 
 const StyledRegisteredShoppingItems = styled(Stack)`
-  height: calc(100vh - 340px - 30pt);
+  overflow-y: scroll;
+  padding-bottom: 8px;
 `;
 
 const StyledRegisteredShoppingEachItem = styled(Stack)`
@@ -72,20 +78,20 @@ const StyledStackFormularBox = styled(Stack)`
 const StyledStackButtonBox = styled(Stack)`
   .ms-Button {
     width: 25vw;
-    height: 50px;
+    height: ${buttonHeight}px;
   }
 `;
 
 const StyledStackControlButtonBox = styled(Stack)`
   .btn-register {
     width: 40vw;
-    height: 50px;
+    height: ${buttonHeight}px;
   }
 
   .btn-clear,
   .btn-register-clear {
     width: 30vw;
-    height: 50px;
+    height: ${buttonHeight}px;
   }
 `;
 
@@ -175,10 +181,10 @@ const Calculator: React.FC = () => {
 
       <StyledDivPageBody>
         <StyledRegisteredShoppingItemBox>
-          <StyledRegisteredShoppingItems>
+          <StyledRegisteredShoppingItems id="styled-registered-shopping-item-box">
             {shoppingItems.map((item) => {
               return (
-                <StyledRegisteredShoppingEachItem horizontal>
+                <StyledRegisteredShoppingEachItem key={nanoid()} horizontal>
                   <StyledShoppingItemBox>
                     <span>{item.price.toLocaleString('en-US')}</span>
                   </StyledShoppingItemBox>
@@ -187,7 +193,9 @@ const Calculator: React.FC = () => {
               );
             })}
           </StyledRegisteredShoppingItems>
+        </StyledRegisteredShoppingItemBox>
 
+        <Stack>
           <StyledStackFormularBox horizontal>
             <Stack horizontal style={{ width: '60vw' }}>
               <StyledH1Formular
@@ -216,6 +224,7 @@ const Calculator: React.FC = () => {
                 {onHandleCalculatePrice(sumShoppingItems, ratioShoppingItems)}원 부족
               </StyledH1Formular>
             </Stack>
+
             <Stack style={{ width: '40vw', textAlign: 'right' }}>
               {splitSumShoppingItems.upper3 !== '' ? (
                 <Stack horizontal style={{ justifyContent: 'flex-end' }}>
@@ -234,9 +243,7 @@ const Calculator: React.FC = () => {
               )}
             </Stack>
           </StyledStackFormularBox>
-        </StyledRegisteredShoppingItemBox>
 
-        <Stack>
           <StyledStackFormularBox>
             <StyledH1Formular>{formular}</StyledH1Formular>
           </StyledStackFormularBox>
@@ -248,34 +255,43 @@ const Calculator: React.FC = () => {
           </StyledStackFormularBox>
         </Stack>
 
-        <StyledStackControlButtonBox horizontal>
-          <PrimaryButton
-            className="btn-register"
-            onClick={() => {
-              try {
-                const parsedPrice = Number.parseInt(evaluation);
-                if (isFalse(Number.isNaN(parsedPrice))) {
-                  const uid = uuid.v4().replace(/-/g, '');
+        <Stack className="stack-calculator-btn-box">
+          <StyledStackControlButtonBox horizontal>
+            <PrimaryButton
+              className="btn-register"
+              onClick={() => {
+                try {
+                  const parsedPrice = Number.parseInt(evaluation);
+                  if (isFalse(Number.isNaN(parsedPrice))) {
+                    const uid = uuid.v4().replace(/-/g, '');
 
-                  onAppendShoppingItem({ price: parsedPrice, uid });
-                  onClearFormular();
+                    onAppendShoppingItem({ price: parsedPrice, uid });
+                    onClearFormular();
+
+                    setTimeout(() => {
+                      const div = document.getElementById('styled-registered-shopping-item-box');
+
+                      if (isNotEmpty(div)) {
+                        console.log();
+                        div.scrollTop = div.scrollHeight;
+                      }
+                    }, 100);
+                  }
+                } catch {
+                  console.debug('오류 ㅠㅠ ');
                 }
-              } catch {
-                console.debug('오류 ㅠㅠ ');
-              }
-            }}
-          >
-            등록
-          </PrimaryButton>
-          <DefaultButton className="btn-register-clear" onClick={() => onRemoveAllShoppingItem()}>
-            등록 모두 삭제
-          </DefaultButton>
-          <DefaultButton className="btn-clear" onClick={() => onClearFormular()}>
-            C
-          </DefaultButton>
-        </StyledStackControlButtonBox>
+              }}
+            >
+              등록
+            </PrimaryButton>
+            <DefaultButton className="btn-register-clear" onClick={() => onRemoveAllShoppingItem()}>
+              등록 초기화
+            </DefaultButton>
+            <DefaultButton className="btn-clear" onClick={() => onClearFormular()}>
+              C
+            </DefaultButton>
+          </StyledStackControlButtonBox>
 
-        <Stack>
           <StyledStackButtonBox horizontal>
             <DefaultButton onClick={() => onHandleClickCalcularButton('7')}>7</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('8')}>8</DefaultButton>
@@ -299,9 +315,16 @@ const Calculator: React.FC = () => {
 
           <StyledStackButtonBox horizontal>
             <DefaultButton onClick={() => onHandleClickCalcularButton('0')}>0</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('00')}>00</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('.')}>.</DefaultButton>
             <DefaultButton onClick={() => onRemoveFormular()}>{'<'}</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('+')}>+</DefaultButton>
+          </StyledStackButtonBox>
+
+          <StyledStackButtonBox horizontal>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('00')}>00</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('000')}>000</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('990')}>990</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('90')}>90</DefaultButton>
           </StyledStackButtonBox>
         </Stack>
       </StyledDivPageBody>
