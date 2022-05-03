@@ -90,11 +90,13 @@ const onWritableAppendFormular = atom<null, string>(null, (get, set, formular) =
   const state = get(mainAtom);
 
   if (state.formular.length <= 0 && isOperator(formular)) {
+    console.log('첫 입력으로 연산자 들어와서 아무것도 안함');
     return set(mainAtom, state);
   }
 
   if (isOperator(formular)) {
     state.operator = formular;
+    console.log('연산자 들어옴');
     return set(mainAtom, { ...state });
   }
 
@@ -102,8 +104,12 @@ const onWritableAppendFormular = atom<null, string>(null, (get, set, formular) =
     state.formular = state.formular.concat([state.operator, formular]);
     state.operator = undefined;
 
+    console.log('연산자 있고, 공식도 추가함');
+
     return set(mainAtom, { ...state });
   }
+
+  console.log('연산자 없고, 뭔가 추가함');
 
   const { head, tail } = splitFomular(state.formular);
   const newFormular = head.concat([`${tail}${formular}`]);

@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { DefaultButton, PrimaryButton, Stack, Text } from '@fluentui/react';
+import { DefaultButton, PrimaryButton, Stack, Text, Icon } from '@fluentui/react';
 import classnames from 'classnames';
 import { useAtomValue, useUpdateAtom } from 'jotai/utils';
 import * as mathjs from 'mathjs';
 import { isFalse, isNotEmpty } from 'my-easy-fp';
+import { nanoid } from 'nanoid';
 import { useCallback } from 'react';
 import { useIntl } from 'react-intl';
 import * as uuid from 'uuid';
@@ -12,25 +13,25 @@ import { readable as shoppingReadable, writable as shoppingWritable } from '../a
 import {
   uiPrimaryFont,
   uiPrimaryGreen,
+  uiPrimaryInvertFont,
   uiPrimaryOrange,
   uiPrimaryRed,
-  uiPrimaryUX,
 } from '../design/color';
 import { StyledDivPageBody, StyledDivPageBox, StyledDivPageHeading } from './Layout';
-import { nanoid } from 'nanoid';
 
-const buttonHeight = 40;
+const buttonHeight = 55;
 const textHeight = 15;
 
 const StyledStackHeading = styled(Stack)`
   width: 100%;
   height: 100%;
-  background-color: ${uiPrimaryUX.toString()};
-  justify-content: center;
+  background-color: ${uiPrimaryFont.lighten(0.9).toString()};
+  justify-content: flex-start;
+  align-items: center;
   padding-left: 2em;
 
   h1 {
-    color: ${uiPrimaryUX.lighten(0.7).toString()};
+    color: ${uiPrimaryInvertFont.lighten(0.1).toString()};
   }
 `;
 
@@ -43,7 +44,7 @@ const StyledH1Formular = styled.h1`
 
 // 제목이 60px라서 60을 더해줘야 제대로 계산이 된다
 const StyledRegisteredShoppingItemBox = styled(Stack)`
-  height: calc(100vh - ${buttonHeight * 6 + 60}px - ${textHeight * 3}pt);
+  height: calc(100vh - ${buttonHeight * 5 + 30}px - ${textHeight * 3}pt);
   padding-left: 10px;
   padding-right: 10px;
 `;
@@ -172,10 +173,17 @@ const Calculator: React.FC = () => {
   return (
     <StyledDivPageBox>
       <StyledDivPageHeading>
-        <StyledStackHeading>
-          <Text as="h1" variant="xxLarge">
-            {intl.formatMessage({ id: 'calc.heading' })}
-          </Text>
+        <StyledStackHeading horizontal>
+          <Stack style={{ paddingRight: 8 }}>
+            <Text as="h1" variant="large">
+              <Icon iconName="Calculator" />
+            </Text>
+          </Stack>
+          <Stack>
+            <Text as="h1" variant="large">
+              {intl.formatMessage({ id: 'calc.heading' })}
+            </Text>
+          </Stack>
         </StyledStackHeading>
       </StyledDivPageHeading>
 
@@ -198,8 +206,10 @@ const Calculator: React.FC = () => {
         <Stack>
           <StyledStackFormularBox horizontal>
             <Stack horizontal style={{ width: '60vw' }}>
-              <StyledH1Formular
-                style={{ width: '50%' }}
+              <Text
+                as="h1"
+                variant="xLarge"
+                style={{ width: '35%' }}
                 className={classnames({
                   'warn-red': onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'red',
                   'warn-orange':
@@ -210,9 +220,12 @@ const Calculator: React.FC = () => {
               >
                 {onHandleCalculateRatio(ratioShoppingItems)}
                 {'%'}
-              </StyledH1Formular>
-              <StyledH1Formular
-                style={{ width: '50%' }}
+              </Text>
+
+              <Text
+                as="h1"
+                variant="xLarge"
+                style={{ width: '65%' }}
                 className={classnames({
                   'warn-red': onHandleReachPrice(sumShoppingItems, ratioShoppingItems) === 'red',
                   'warn-orange':
@@ -222,24 +235,24 @@ const Calculator: React.FC = () => {
                 })}
               >
                 {onHandleCalculatePrice(sumShoppingItems, ratioShoppingItems)}원 부족
-              </StyledH1Formular>
+              </Text>
             </Stack>
 
             <Stack style={{ width: '40vw', textAlign: 'right' }}>
               {splitSumShoppingItems.upper3 !== '' ? (
                 <Stack horizontal style={{ justifyContent: 'flex-end' }}>
-                  <StyledH1Formular>
+                  <Text as="h1" variant="xLarge">
                     {splitSumShoppingItems.upper3}
                     {','}
-                  </StyledH1Formular>
-                  <StyledH1Formular style={{ fontWeight: 'bold' }}>
+                  </Text>
+                  <Text as="h1" variant="xLarge">
                     {splitSumShoppingItems.less3}
-                  </StyledH1Formular>
+                  </Text>
                 </Stack>
               ) : (
-                <StyledH1Formular style={{ fontWeight: 'bold' }}>
+                <Text as="h1" variant="xLarge">
                   {splitSumShoppingItems.less3}
-                </StyledH1Formular>
+                </Text>
               )}
             </Stack>
           </StyledStackFormularBox>
@@ -282,7 +295,9 @@ const Calculator: React.FC = () => {
                 }
               }}
             >
-              등록
+              <Text variant="large" style={{ color: uiPrimaryInvertFont.toString() }}>
+                등록
+              </Text>
             </PrimaryButton>
             <DefaultButton className="btn-register-clear" onClick={() => onRemoveAllShoppingItem()}>
               등록 초기화
@@ -293,39 +308,71 @@ const Calculator: React.FC = () => {
           </StyledStackControlButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('7')}>7</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('8')}>8</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('9')}>9</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('/')}>÷</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('7')}>
+              <Text variant="xxLarge">7</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('8')}>
+              <Text variant="xxLarge">8</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('9')}>
+              <Text variant="xxLarge">9</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('/')}>
+              <Text variant="xxLarge">÷</Text>
+            </DefaultButton>
           </StyledStackButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('4')}>4</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('5')}>5</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('6')}>6</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('*')}>×</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('4')}>
+              <Text variant="xxLarge">4</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('5')}>
+              <Text variant="xxLarge">5</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('6')}>
+              <Text variant="xxLarge">6</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('*')}>
+              <Text variant="xxLarge">{'×'}</Text>
+            </DefaultButton>
           </StyledStackButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('1')}>1</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('2')}>2</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('3')}>3</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('-')}>-</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('1')}>
+              <Text variant="xxLarge">1</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('2')}>
+              <Text variant="xxLarge">2</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('3')}>
+              <Text variant="xxLarge">3</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('-')}>
+              <Text variant="xxLarge">-</Text>
+            </DefaultButton>
           </StyledStackButtonBox>
 
           <StyledStackButtonBox horizontal>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('0')}>0</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('.')}>.</DefaultButton>
-            <DefaultButton onClick={() => onRemoveFormular()}>{'<'}</DefaultButton>
-            <DefaultButton onClick={() => onHandleClickCalcularButton('+')}>+</DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('0')}>
+              <Text variant="xxLarge">0</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('.')}>
+              <Text variant="xxLarge">.</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onRemoveFormular()}>
+              <Text variant="xxLarge">{'<'}</Text>
+            </DefaultButton>
+            <DefaultButton onClick={() => onHandleClickCalcularButton('+')}>
+              <Text variant="xxLarge">+</Text>
+            </DefaultButton>
           </StyledStackButtonBox>
 
-          <StyledStackButtonBox horizontal>
+          {/* <StyledStackButtonBox horizontal>
             <DefaultButton onClick={() => onHandleClickCalcularButton('00')}>00</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('000')}>000</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('990')}>990</DefaultButton>
             <DefaultButton onClick={() => onHandleClickCalcularButton('90')}>90</DefaultButton>
-          </StyledStackButtonBox>
+          </StyledStackButtonBox> */}
         </Stack>
       </StyledDivPageBody>
     </StyledDivPageBox>

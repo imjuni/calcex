@@ -18,6 +18,7 @@
     "classnames": "^2.3.1",
     "color": "^3.2.1",
     "emotion-reset": "^3.0.1",
+    "font-awesome": "^4.7.0",
     "formik": "^2.2.9",
     "jotai": "^1.4.0",
     "mathjs": "^9.5.2",
