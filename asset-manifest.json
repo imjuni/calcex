@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.js": "/calcex/static/js/main.d624c5aa.chunk.js",
-    "main.js.map": "/calcex/static/js/main.d624c5aa.chunk.js.map",
-    "runtime-main.js": "/calcex/static/js/runtime-main.55faad78.js",
-    "runtime-main.js.map": "/calcex/static/js/runtime-main.55faad78.js.map",
-    "static/js/2.f99d59af.chunk.js": "/calcex/static/js/2.f99d59af.chunk.js",
-    "static/js/2.f99d59af.chunk.js.map": "/calcex/static/js/2.f99d59af.chunk.js.map",
-    "static/js/3.12a396f1.chunk.js": "/calcex/static/js/3.12a396f1.chunk.js",
-    "static/js/3.12a396f1.chunk.js.map": "/calcex/static/js/3.12a396f1.chunk.js.map",
+    "main.js": "/calcex/static/js/main.3eebf0e3.chunk.js",
+    "main.js.map": "/calcex/static/js/main.3eebf0e3.chunk.js.map",
+    "runtime-main.js": "/calcex/static/js/runtime-main.87532b13.js",
+    "runtime-main.js.map": "/calcex/static/js/runtime-main.87532b13.js.map",
+    "static/js/2.d701f41d.chunk.js": "/calcex/static/js/2.d701f41d.chunk.js",
+    "static/js/2.d701f41d.chunk.js.map": "/calcex/static/js/2.d701f41d.chunk.js.map",
+    "static/js/3.54a6f894.chunk.js": "/calcex/static/js/3.54a6f894.chunk.js",
+    "static/js/3.54a6f894.chunk.js.map": "/calcex/static/js/3.54a6f894.chunk.js.map",
     "index.html": "/calcex/index.html",
-    "static/js/2.f99d59af.chunk.js.LICENSE.txt": "/calcex/static/js/2.f99d59af.chunk.js.LICENSE.txt"
+    "static/js/2.d701f41d.chunk.js.LICENSE.txt": "/calcex/static/js/2.d701f41d.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.55faad78.js",
-    "static/js/2.f99d59af.chunk.js",
-    "static/js/main.d624c5aa.chunk.js"
+    "static/js/runtime-main.87532b13.js",
+    "static/js/2.d701f41d.chunk.js",
+    "static/js/main.3eebf0e3.chunk.js"
   ]
 }
