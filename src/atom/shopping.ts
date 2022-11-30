@@ -1,6 +1,8 @@
 import { atom } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
 
+const key = 'calculator.shopping.state';
+
 export interface IShoppingItem {
   name?: string;
   uid: string;
@@ -11,7 +13,21 @@ const defaultValue: { items: IShoppingItem[] } = {
   items: [],
 };
 
-export const mainAtom = atomWithReset(defaultValue);
+function getInitialValue() {
+  try {
+    const item = localStorage.getItem(key);
+
+    if (item !== null) {
+      return JSON.parse(item) as { items: IShoppingItem[] };
+    }
+
+    return defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+export const mainAtom = atomWithReset(getInitialValue());
 
 const onReadableShoppingItems = atom<IShoppingItem[]>((get) => {
   const state = get(mainAtom);
@@ -63,6 +79,7 @@ const onWritableAppendShoppingItem = atom<null, IShoppingItem>(null, (get, set, 
   const state = get(mainAtom);
   state.items = [...state.items, update];
 
+  localStorage.setItem(key, JSON.stringify(state));
   return set(mainAtom, { ...state });
 });
 
@@ -70,12 +87,14 @@ const onWritableRemoveShoppingItem = atom<null, string>(null, (get, set, uid) =>
   const state = get(mainAtom);
   state.items = state.items.filter((item) => item.uid !== uid);
 
+  localStorage.setItem(key, JSON.stringify(state));
   return set(mainAtom, { ...state });
 });
 
 const onWritableRemoveAllShoppingItem = atom<null, undefined>(null, (get, set) => {
   const state = get(mainAtom);
 
+  localStorage.setItem(key, JSON.stringify(state));
   return set(mainAtom, { ...state, items: [] });
 });
 

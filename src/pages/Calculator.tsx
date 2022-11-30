@@ -299,7 +299,13 @@ const Calculator: React.FC = () => {
                 등록
               </Text>
             </PrimaryButton>
-            <DefaultButton className="btn-register-clear" onClick={() => onRemoveAllShoppingItem()}>
+            <DefaultButton
+              className="btn-register-clear"
+              onClick={() => {
+                onRemoveAllShoppingItem();
+                onClearFormular();
+              }}
+            >
               등록 초기화
             </DefaultButton>
             <DefaultButton className="btn-clear" onClick={() => onClearFormular()}>
