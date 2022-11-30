@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.js": "/calcex/static/js/main.3eebf0e3.chunk.js",
-    "main.js.map": "/calcex/static/js/main.3eebf0e3.chunk.js.map",
+    "main.js": "/calcex/static/js/main.db0d862d.chunk.js",
+    "main.js.map": "/calcex/static/js/main.db0d862d.chunk.js.map",
     "runtime-main.js": "/calcex/static/js/runtime-main.87532b13.js",
     "runtime-main.js.map": "/calcex/static/js/runtime-main.87532b13.js.map",
     "static/js/2.d701f41d.chunk.js": "/calcex/static/js/2.d701f41d.chunk.js",
@@ -14,6 +14,6 @@
   "entrypoints": [
     "static/js/runtime-main.87532b13.js",
     "static/js/2.d701f41d.chunk.js",
-    "static/js/main.3eebf0e3.chunk.js"
+    "static/js/main.db0d862d.chunk.js"
   ]
 }
